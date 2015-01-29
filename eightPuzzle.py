@@ -9,7 +9,7 @@ from search import *
 class eightPuzzle(StateSpace):
     StateSpace.n = 0
 
-    # Private attribute used to determine the successors of any given state.
+    # Class variable used to determine the successors of any given state.
     #
     # DO NOT MODIFY THIS STRUCTURE!
     #
@@ -76,6 +76,7 @@ class eightPuzzle(StateSpace):
 
     def hashable_state(self) :
 #IMPLEMENT
+        return tuple(self.state)
 
     def print_state(self):
 #DO NOT CHANGE THIS METHOD

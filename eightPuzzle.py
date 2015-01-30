@@ -117,6 +117,17 @@ def h_misplacedTiles(state):
 #IMPLEMENT
     #return the number of tiles (NOT INCLUDING THE BLANK) in state that are not in their goal
     #position. (will need to access the class variable eigthPuzzle.goal_state)
+    misplacedTiles = 0
+    
+    for index in range(len(state.state)):
+        # Skip the zero tile
+        if state.state[index] == 0:
+            continue
+        
+        if state.state[index] != eightPuzzle.goal_state[index]:
+            misplacedTiles += 1
+            
+    return misplacedTiles
 
 def h_MHDist(state):
     #return the sum of the manhattan distances each tile (NOT INCLUDING
@@ -124,3 +135,26 @@ def h_MHDist(state):
     #The manhattan distance of a tile that is currently in row i column j
     #and that has to be in row x column y in the goal is defined to be
     #  abs(i - x) + abs(j - y)
+    
+    mhDist = 0
+    
+    for index in range(len(state.state)):
+        # Skip the zero tile
+        if state.state[index] == 0:
+            continue
+        
+        # TODO
+        
+    return mhDist
+
+#if __name__ == "__main__":
+    
+    #se = SearchEngine('astar', 'full')
+    
+    ## Test Group 1
+    #eightPuzzle_set_goal([1, 2, 3, 8, 0, 4, 7, 6, 5])
+    ## Easy
+    #s2 = eightPuzzle("START", 0, [1, 3, 4, 8, 6, 2, 7, 0, 5])    
+    
+    #print("===========Test 1, EASY, ASTAR, h_misplacedTiles======")
+    #se.search(s2, eightPuzzle_goal_fn, h_misplacedTiles)    

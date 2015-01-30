@@ -117,7 +117,7 @@ def h_misplacedTiles(state):
 #IMPLEMENT
     #return the number of tiles (NOT INCLUDING THE BLANK) in state that are not in their goal
     #position. (will need to access the class variable eigthPuzzle.goal_state)
-    misplacedTiles = 0
+    misplaced_tiles = 0
     
     for index in range(len(state.state)):
         # Skip the zero tile
@@ -125,9 +125,9 @@ def h_misplacedTiles(state):
             continue
         
         if state.state[index] != eightPuzzle.goal_state[index]:
-            misplacedTiles += 1
+            misplaced_tiles += 1
     
-    return misplacedTiles
+    return misplaced_tiles
 
 def h_MHDist(state):
     #return the sum of the manhattan distances each tile (NOT INCLUDING
@@ -135,19 +135,20 @@ def h_MHDist(state):
     #The manhattan distance of a tile that is currently in row i column j
     #and that has to be in row x column y in the goal is defined to be
     #  abs(i - x) + abs(j - y)
-    mhDist = 0
+    mh_dist = 0
     
     for index in range(len(state.state)):
         # Skip the zero tile
         if state.state[index] == 0:
             continue
         
-        xCoord = state.state[index] % 3
-        yCoord = state.state[index] // 3
+        tile_goal_index = eightPuzzle.goal_state.index(state.state[index])
         
-        xCoordGoal = eightPuzzle.goal_state[index] % 3
-        yCoordGoal = eightPuzzle.goal_state[index] // 3
+        xCoord = index % 3
+        xCoordGoal = tile_goal_index % 3
+        yCoord = index // 3
+        yCoordGoal = tile_goal_index // 3
+                        
+        mh_dist += abs(xCoord - xCoordGoal) + abs(yCoord - yCoordGoal)
         
-        mhDist += abs(xCoord - xCoordGoal) + abs(yCoord - yCoordGoal)
-        
-    return mhDist
+    return mh_dist

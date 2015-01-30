@@ -15,15 +15,15 @@ class eightPuzzle(StateSpace):
     #
     # Warning: Prevention of any any changes made to this structure is not
     #          enforced explicitly.
-    _successors_map = { 0 :  [{"DOWN": 3}, {"RIGHT": 1}],
-                        1 :  [{"DOWN": 4}, {"RIGHT":2}, {"LEFT": 0}],
-                        2 :  [{"DOWN": 5}, {"LEFT": 1}],
-                        3 :  [{"DOWN": 6}, {"UP": 0}, {"RIGHT": 4}],
-                        4 :  [{"DOWN": 7}, {"UP": 1}, {"RIGHT": 5}, {"LEFT": 3}],
-                        5 :  [{"DOWN": 8}, {"UP": 2}, {"LEFT": 4}],
-                        6 :  [{"UP": 3}, {"RIGHT": 7}],
-                        7 :  [{"UP": 4}, {"RIGHT": 8}, {"LEFT": 6}],
-                        8 :  [{"UP": 5}, {"LEFT": 7}] };
+    _successors_map = { 0 :  [{"Blank-Down": 3}, {"Blank-Right": 1}],
+                        1 :  [{"Blank-Down": 4}, {"Blank-Right":2}, {"Blank-Left": 0}],
+                        2 :  [{"Blank-Down": 5}, {"Blank-Left": 1}],
+                        3 :  [{"Blank-Down": 6}, {"Blank-Up": 0}, {"Blank-Right": 4}],
+                        4 :  [{"Blank-Down": 7}, {"Blank-Up": 1}, {"Blank-Right": 5}, {"Blank-Left": 3}],
+                        5 :  [{"Blank-Down": 8}, {"Blank-Up": 2}, {"Blank-Left": 4}],
+                        6 :  [{"Blank-Up": 3}, {"Blank-Right": 7}],
+                        7 :  [{"Blank-Up": 4}, {"Blank-Right": 8}, {"Blank-Left": 6}],
+                        8 :  [{"Blank-Up": 5}, {"Blank-Left": 7}] };
 
     def __init__(self, action, gval, state, parent = None):
         '''Create an 8-puzzle state object.
@@ -126,7 +126,7 @@ def h_misplacedTiles(state):
         
         if state.state[index] != eightPuzzle.goal_state[index]:
             misplacedTiles += 1
-            
+    
     return misplacedTiles
 
 def h_MHDist(state):
@@ -135,7 +135,6 @@ def h_MHDist(state):
     #The manhattan distance of a tile that is currently in row i column j
     #and that has to be in row x column y in the goal is defined to be
     #  abs(i - x) + abs(j - y)
-    
     mhDist = 0
     
     for index in range(len(state.state)):
@@ -143,18 +142,12 @@ def h_MHDist(state):
         if state.state[index] == 0:
             continue
         
-        # TODO
+        xCoord = state.state[index] % 3
+        yCoord = state.state[index] // 3
+        
+        xCoordGoal = eightPuzzle.goal_state[index] % 3
+        yCoordGoal = eightPuzzle.goal_state[index] // 3
+        
+        mhDist += abs(xCoord - xCoordGoal) + abs(yCoord - yCoordGoal)
         
     return mhDist
-
-#if __name__ == "__main__":
-    
-    #se = SearchEngine('astar', 'full')
-    
-    ## Test Group 1
-    #eightPuzzle_set_goal([1, 2, 3, 8, 0, 4, 7, 6, 5])
-    ## Easy
-    #s2 = eightPuzzle("START", 0, [1, 3, 4, 8, 6, 2, 7, 0, 5])    
-    
-    #print("===========Test 1, EASY, ASTAR, h_misplacedTiles======")
-    #se.search(s2, eightPuzzle_goal_fn, h_misplacedTiles)    

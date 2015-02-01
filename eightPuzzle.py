@@ -46,9 +46,9 @@ class eightPuzzle(StateSpace):
         StateSpace.__init__(self, action, gval, parent)
         self.state = state
 
-        # The zero_tile attribute represents the index of the zero tile into
+        # The blank_tile_idx attribute represents the index of the zero tile into
         # the state attribute, which is a list.
-        self.zero_tile = self.state.index(0);
+        self.blank_tile_idx = self.state.index(0);
 
     def successors(self) :
 #IMPLEMENT
@@ -61,14 +61,14 @@ class eightPuzzle(StateSpace):
 
         States = list()
 
-        for mapping in self._successors_map[self.zero_tile] :
+        for mapping in self._successors_map[self.blank_tile_idx] :
 
             # A mapping has the form {'ACTION' : 'SWAP INDEX'}
             succ_action = list(mapping.keys())[0]
             swap_index = mapping[succ_action]
 
             succ_state = list(self.state)
-            succ_state[swap_index], succ_state[self.zero_tile] = succ_state[self.zero_tile], succ_state[swap_index];
+            succ_state[swap_index], succ_state[self.blank_tile_idx] = succ_state[self.blank_tile_idx], succ_state[swap_index];
 
             States.append(eightPuzzle(succ_action, self.gval+1, succ_state, self))
 
@@ -121,7 +121,7 @@ def h_misplacedTiles(state):
     
     for index in range(len(state.state)):
         # Skip the zero tile
-        if state.state[index] == 0:
+        if index == state.blank_tile_idx:
             continue
         
         if state.state[index] != eightPuzzle.goal_state[index]:
@@ -139,7 +139,7 @@ def h_MHDist(state):
     
     for index in range(len(state.state)):
         # Skip the zero tile
-        if state.state[index] == 0:
+        if index == state.blank_tile_idx:
             continue
         
         tile_goal_index = eightPuzzle.goal_state.index(state.state[index])

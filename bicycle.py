@@ -14,13 +14,15 @@ from random import randint
 from math import sqrt
 
 class bicycle(StateSpace):
-    def __init__(self, action, gval, ...
+    def __init__(self, action, gval, state, parent = None, map, job_list):
 #IMPLEMENT
         '''Initialize a bicycle search state object.'''
         if action == 'START':   #NOTE action = 'START' is treated as starting the search space
             StateSpace.n = 0
         StateSpace.__init__(self, action, gval, parent)
         #implement the rest of this function.
+        self.map = map
+        self.job_list = job_list
 
     def successors(self): 
 #IMPLEMENT
@@ -108,6 +110,18 @@ def make_start_state(map, job_list):
     '''Input a map list and a job_list. Return a bicycle StateSpace object
     with action "START", gval = 0, and initial location "home" that represents the 
     starting configuration for the scheduling problem specified'''
+    
+    for job in job_list:
+        jobs_not_started.append(job[0]);
+    
+    state = {"jobs_carried": [],
+             "location": "home",
+             "time": 420,
+             "earnings": 0,
+             "jobs_not_started": jobs_not_started}
+    
+    start_state = bicycle("START", 0, state, map, job_list)
+    return start_state
 
 ########################################################
 #   Functions provided so that you can more easily     #

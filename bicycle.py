@@ -92,8 +92,7 @@ class bicycle(StateSpace):
                         carried_job_info = get_job_info(carried_job_name, self.get_job_list())
                         carried_job_destination_location = carried_job_info[3]
                         if job_pickup_location == carried_job_destination_location:
-                            cannot_pickup == True
-                            break
+                            cannot_pickup = True
 
                     if cannot_pickup == False:
                         new_jobs_carried = list(self.get_carrying())
@@ -124,7 +123,7 @@ class bicycle(StateSpace):
                 
                 # Cannot perform a deliver action if the job is delivered 
                 # past the end of the day time.
-                if new_state_time >= self.get_max_deliver():
+                if new_state_time <= self.get_max_deliver():
                     new_jobs_carried = list(self.get_carrying())
                     new_jobs_carried.remove(job_name)
                     new_jobs_not_started = list(self.get_unstarted())

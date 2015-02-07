@@ -142,7 +142,7 @@ class bicycle(StateSpace):
     def hashable_state(self) :
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
-        return ()
+        # TODO
     
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
@@ -263,6 +263,7 @@ def heur_sum_delivery_costs(state):
     #Plus 
     #Sum over every unstarted job J: Lost revenue if we immediately travel to J's pickup 
     #point then to J's dropoff point and then deliver J.
+    # TODO
 
 def heur_max_delivery_costs(state):
 #IMPLEMENT
@@ -272,7 +273,7 @@ def heur_max_delivery_costs(state):
     #m2 = Max over every unstarted job J: Lost revenue if we immediately travel to J's pickup 
     #point then to J's dropoff poing and then deliver J.
     #heur_max_delivery_costs(state) = max(m1, m2)
-
+    # TODO
 
 def bicycle_goal_fn(state):
 #IMPLEMENT
@@ -295,7 +296,7 @@ def make_start_state(loc_map, job_list):
 
 ########################################################
 #   Functions provided so that you can more easily     #
-#   Test your implementation                   #
+#   Test your implementation                           #
 ########################################################
 
 def make_rand_map(nlocs):
@@ -353,14 +354,14 @@ def make_rand_jobs(map, njobs):
         jobs.append(job)
     return jobs
 
-#def test(nloc, njobs):
-#    map = make_rand_map(nloc)
-#    jobs = make_rand_jobs(map, njobs)
-#    print("Map = ", map)
-#    print("jobs = ", jobs)
-#    s0 = make_start_state(map, jobs)
-#    print("heur Sum = ", heur_sum_delivery_costs(s0))
-#    print("heur max = ", heur_max_delivery_costs(s0))
-#    se = SearchEngine('astar', 'full')
+def test(nloc, njobs):
+    map = make_rand_map(nloc)
+    jobs = make_rand_jobs(map, njobs)
+    print("Map = ", map)
+    print("jobs = ", jobs)
+    s0 = make_start_state(map, jobs)
+    print("heur Sum = ", heur_sum_delivery_costs(s0))
+    print("heur max = ", heur_max_delivery_costs(s0))
+    se = SearchEngine('astar', 'full')
     #se.trace_on(2)
-#    final = se.search(s0, bicycle_goal_fn, heur_max_delivery_costs)
+    final = se.search(s0, bicycle_goal_fn, heur_max_delivery_costs)

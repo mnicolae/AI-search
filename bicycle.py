@@ -83,7 +83,7 @@ class bicycle(StateSpace):
             
                 # Cannot perform a pickup action if adding the job to the jobs already carried
                 # by the courier causes the total weight carried to exceed the courier's limit.
-                if get_load(self) + job_weight <= self.get_max_weight():
+                if self.get_load() + job_weight <= self.get_max_weight():
                     # The courier is not allowed to perform a pickup action if the pickup 
                     # location is the same as the delivery location of some package 
                     # currently being carried.
@@ -110,7 +110,7 @@ class bicycle(StateSpace):
                         States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_job_list(), self))
 
             # Deliver actions
-            for job_name in get_carrying(self):
+            for job_name in self.get_carrying():
                 job_info = get_job_info(job_name, self.get_job_list())
                 job_pickup_location = job_info[1]
                 job_pickup_time = job_info[2]             
@@ -176,10 +176,10 @@ class bicycle(StateSpace):
 
     def get_max_deliver(self):
         return self._MAX_DELIVER
-    
     #
     # Custom methods end here
     #
+
     def get_loc(self):
 #IMPLEMENT
         '''Return location of courier in this state'''
@@ -239,7 +239,7 @@ def get_job_earning(time, job_name, job_list):
         if job_list[index][0] == job_name:
             break
         
-    earnings_list = job_list[index][1]
+    earnings_list = job_list[index][5]
     earning = 0
     
     for elem in earnings_list:
@@ -247,10 +247,10 @@ def get_job_earning(time, job_name, job_list):
             earning = elem[1]
     
     return earning
-
 #
 # Custom functions end here
 #
+
 def heur_null(state):
     '''Null Heuristic use to make A* search perform uniform cost search'''
     return 0
@@ -262,7 +262,7 @@ def heur_sum_delivery_costs(state):
     #immediately travel to J's dropoff point and deliver J.
     #Plus 
     #Sum over every unstarted job J: Lost revenue if we immediately travel to J's pickup 
-    #point then to J's dropoff poing and then deliver J.
+    #point then to J's dropoff point and then deliver J.
 
 def heur_max_delivery_costs(state):
 #IMPLEMENT
@@ -277,8 +277,9 @@ def heur_max_delivery_costs(state):
 def bicycle_goal_fn(state):
 #IMPLEMENT
     '''Have we reached the goal (where all jobs have been delivered)?'''
+    return len(state.get_carrying()) == 0 and len(state.get_unstarted()) == 0
 
-def make_start_state(map, job_list):
+def make_start_state(loc_map, job_list):
 #IMPLEMENT
     '''Input a map list and a job_list. Return a bicycle StateSpace object
     with action "START", gval = 0, and initial location "home" that represents the 
@@ -289,7 +290,7 @@ def make_start_state(map, job_list):
         jobs_not_started.append(job[0]);
     
     bStateInfo = bicycleStateInfo([], 0, "home", 420, 0, jobs_not_started)
-    start_state = bicycle("START", 0, bStateInfo, map, job_list)
+    start_state = bicycle("START", 0, bStateInfo, loc_map, job_list)
     return start_state
 
 ########################################################

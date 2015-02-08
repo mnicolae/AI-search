@@ -14,7 +14,7 @@ from random import randint
 from math import sqrt
 
 class bicycleStateInfo:
-    def __init__ (self, jobs_carried, jobs_carried_weight, location, time, earnings, jobs_not_started):
+    def __init__(self, jobs_carried, jobs_carried_weight, location, time, earnings, jobs_not_started):
         ''' Initialize a bicycleStateInfo object. '''
         self.jobs_carried = jobs_carried
         self.jobs_carried_weight = jobs_carried_weight
@@ -27,7 +27,7 @@ class bicycle(StateSpace):
     _MAX_WEIGHT = 10000
     _MAX_DELIVER = 1140
     
-    def __init__(self, action, gval, state, loc_map, job_list, parent=None):
+    def __init__(self, action, gval, state, loc_map, jobs_info, parent=None):
 #IMPLEMENT
         '''Initialize a bicycle search state object.'''
         if action == 'START':    #NOTE action = 'START' is treated as starting the search space
@@ -37,7 +37,7 @@ class bicycle(StateSpace):
         #implement the rest of this function.
         self.state = state
         self.loc_map = loc_map
-        self.job_list = job_list
+        self.jobs_info = jobs_info
 
     def successors(self): 
 #IMPLEMENT
@@ -48,11 +48,9 @@ class bicycle(StateSpace):
         if self.get_loc() == 'home':
             # first_pickup actions
             for job_name in self.get_unstarted():
-                job_info = get_job_info(job_name, self.get_job_list())
-                job_pickup_location = job_info[1]
-                job_pickup_time = job_info[2]             
-                job_destination_location = job_info[3]
-                job_weight = job_info[4]
+                job_pickup_location = self.get_pickup_location(job_name)
+                job_pickup_time = self.get_pickup_time(job_name)
+                job_weight = self.get_job_weight(job_name)
                 
                 # Cannot perform a first_pickup action if adding the job to the jobs already carried
                 # by the courier causes the total weight carried to exceed the courier's limit.
@@ -61,25 +59,26 @@ class bicycle(StateSpace):
                     new_jobs_carried.append(job_name)
                     new_jobs_not_started = list(self.get_unstarted())
                     new_jobs_not_started.remove(job_name)
-                    new_state = bicycleStateInfo(new_jobs_carried, \
-                                                 self.get_load() + job_weight, \
-                                                 job_pickup_location, \
-                                                 job_pickup_time, \
-                                                 self.get_earned(), \
-                                                 new_jobs_not_started)
                     
+                    # TODO: what if travel time value implies we arrive later than the pickup time? 
+                    # TODO: can we assume one package does not exceed the weight limit?
+                    new_state = bicycleStateInfo(new_jobs_carried, \
+                                                    self.get_load() + job_weight, \
+                                                    job_pickup_location, \
+                                                    job_pickup_time, \
+                                                    self.get_earned(), \
+                                                    new_jobs_not_started)
+
                     action = "first_pickup(" + job_name + ")"    
-                    States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_job_list(), self))
+                    States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_jobs_info(), self))
                 
         # Location is not home, can only perform pickup or deliver actions
         else:
             # pickup actions
             for job_name in self.get_unstarted():
-                job_info = get_job_info(job_name, self.get_job_list())
-                job_pickup_location = job_info[1]
-                job_pickup_time = job_info[2]             
-                job_destination_location = job_info[3]
-                job_weight = job_info[4]
+                job_pickup_location = self.get_pickup_location(job_name)
+                job_pickup_time = self.get_pickup_time(job_name)            
+                job_weight = self.get_job_weight(job_name)
             
                 # Cannot perform a pickup action if adding the job to the jobs already carried
                 # by the courier causes the total weight carried to exceed the courier's limit.
@@ -89,13 +88,12 @@ class bicycle(StateSpace):
                     # currently being carried.
                     cannot_pickup = False   
                     for carried_job_name in self.get_carrying():
-                        carried_job_info = get_job_info(carried_job_name, self.get_job_list())
-                        carried_job_destination_location = carried_job_info[3]
+                        carried_job_destination_location = self.get_destination_location(carried_job_name)
                         if job_pickup_location == carried_job_destination_location:
                             cannot_pickup = True
 
                     if cannot_pickup == False:
-                        travel_time = get_travel_time(self.get_loc(), job_pickup_location, self.get_loc_map())
+                        travel_time = self.get_travel_time(self.get_loc(), job_pickup_location)
                         new_state_time = self.get_time() + travel_time
                         
                         new_jobs_carried = list(self.get_carrying())
@@ -110,19 +108,18 @@ class bicycle(StateSpace):
                                                     new_jobs_not_started)
                         
                         action = "pickup(" + job_name + ")"
-                        States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_job_list(), self))
+                        States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_jobs_info(), self))
 
             # Deliver actions
             for job_name in self.get_carrying():
-                job_info = get_job_info(job_name, self.get_job_list())
-                job_pickup_location = job_info[1]
-                job_pickup_time = job_info[2]             
-                job_destination_location = job_info[3]
-                job_weight = job_info[4]
-                                        
-                travel_time = get_travel_time(self.get_loc(), job_destination_location, self.get_loc_map())
+                job_pickup_location = self.get_pickup_location(job_name)
+                job_pickup_time = self.get_pickup_time(job_name)  
+                job_destination_location = self.get_destination_location(job_name)
+                job_weight = self.get_job_weight(job_name)
+
+                travel_time = self.get_travel_time(self.get_loc(), job_destination_location)
                 new_state_time = self.get_time() + travel_time
-                job_earning = get_job_earning(new_state_time, job_name, self.get_job_list())
+                job_earning = self.get_job_earning(new_state_time, job_name)
                 
                 # Cannot perform a deliver action if the job is delivered 
                 # past the end of the day time.
@@ -138,16 +135,16 @@ class bicycle(StateSpace):
                                                 new_jobs_not_started)
                     
                     action = "deliver(" + job_name + ")"
-                    new_gval = self.gval + get_job_loss(new_state_time, job_name, self.get_job_list())
-                    States.append(bicycle(action, new_gval, new_state, self.get_loc_map(), self.get_job_list(), self))
+                    new_gval = self.gval + self.get_job_loss(new_state_time, job_name)
+                    States.append(bicycle(action, new_gval, new_state, self.get_loc_map(), self.get_jobs_info(), self))
 
         return States
     
     def hashable_state(self) :
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
-        #return (self.get_carrying(), self.get_load(), self.get_loc(), self.get_time(), self.get_earned(), self.get_unstarted())
-        return (self.get_time(), self.get_loc(), self.get_earned(), self.get_load())
+        return (''.join(self.get_carrying()), self.get_load(), self.get_loc(), self.get_time(), self.get_earned(), ''.join(self.get_unstarted()))
+
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
         #and in generating sample trace output. 
@@ -169,17 +166,88 @@ class bicycle(StateSpace):
     #
     # Custom methods start here
     #
-    def get_loc_map(self):
-        return self.loc_map
-
-    def get_job_list(self):
-        return self.job_list
-
     def get_max_weight(self):
         return self._MAX_WEIGHT
 
     def get_max_deliver(self):
         return self._MAX_DELIVER
+     
+    def get_loc_map(self):
+        return self.loc_map
+
+    def get_jobs_info(self):
+        return self.jobs_info
+
+    def get_job_info(self, job_name):
+        for index in range(len(self.get_jobs_info())):
+            if self.get_jobs_info()[index][0] == job_name:
+                return self.get_jobs_info()[index]
+
+    def get_pickup_location(self, job_name):
+        return self.get_job_info(job_name)[1]
+        
+    def get_pickup_time(self, job_name):
+        return self.get_job_info(job_name)[2]
+        
+    def get_destination_location(self, job_name):
+        return self.get_job_info(job_name)[3]
+        
+    def get_job_weight(self, job_name):
+        return self.get_job_info(job_name)[4]
+    
+    def get_travel_time(self, locA, locB):
+        ''' Given two locations return the associated travel time in map.
+            Assume there always exists a corresponding entry. '''
+        if locA == locB:
+            return 0
+
+        loc_map = self.get_loc_map()
+        check = False    
+        for index in range(len(loc_map[1])):
+            check = all(x in loc_map[1][index] for x in [locA, locB])
+            if check == True:
+                break
+            
+        return loc_map[1][index][2]
+    
+    def get_job_earning(self, time, job_name):
+        ''' Given a delivery time and a job name return the earning
+            achieved when delivering the job at that time. '''
+        jobs_info = self.get_jobs_info()
+
+        for index in range(len(jobs_info)):
+            if jobs_info[index][0] == job_name:
+                break
+            
+        earnings_list = jobs_info[index][5]
+        earning = 0
+        
+        for elem in earnings_list:
+            if time <= elem[0]:
+                earning = elem[1]
+                break
+        
+        return earning
+    
+    def get_job_loss(self, time, job_name):
+        ''' Given a delivery time and a job name return the loss
+            incurred when delivering the job at that time. '''
+        jobs_info = self.get_jobs_info()
+        
+        for index in range(len(jobs_info)):
+            if jobs_info[index][0] == job_name:
+                break
+        
+        earnings_list = jobs_info[index][5]
+        earning = 0
+        
+        for elem in earnings_list:
+            if time <= elem[0]:
+                earning = elem[1]
+                break
+                
+        earning_loss = earnings_list[0][1] - earning
+        return earning_loss    
     #
     # Custom methods end here
     #
@@ -214,68 +282,6 @@ class bicycle(StateSpace):
         '''Return list of NAMES of jobs not yet stated in this state''' 
         return self.state.jobs_not_started
 
-#
-# Custom functions start here
-#
-def get_job_info(job_name, job_list):
-    ''' Given a job name return its corresponding entry in job_list. 
-        Assume there always exists a corresponding entry. '''
-    for index in range(len(job_list)):
-        if job_list[index][0] == job_name:
-            return job_list[index]
-
-def get_travel_time(locA, locB, loc_map):
-    ''' Given two locations return the associated travel time in map.
-        Assume there always exists a corresponding entry. '''
-    if locA == locB:
-        return 0
-    
-    check = False    
-    for index in range(len(loc_map[1])):
-        check = all(x in loc_map[1][index] for x in [locA, locB])
-        if check == True:
-            break
-        
-    return loc_map[1][index][2]
-
-def get_job_earning(time, job_name, job_list):
-    ''' Given a delivery time and a job name return the earning
-        achieved when delivering the job at that time. '''
-    for index in range(len(job_list)):
-        if job_list[index][0] == job_name:
-            break
-        
-    earnings_list = job_list[index][5]
-    earning = 0
-    
-    for elem in earnings_list:
-        if time <= elem[0]:
-            earning = elem[1]
-            break
-    
-    return earning
-
-def get_job_loss(time, job_name, job_list):
-    ''' Given a delivery time and a job name return the loss
-        incurred when delivering the job at that time. '''
-    for index in range(len(job_list)):
-        if job_list[index][0] == job_name:
-            break
-    
-    earnings_list = job_list[index][5]
-    earning = 0
-    
-    for elem in earnings_list:
-        if time <= elem[0]:
-            earning = elem[1]
-            break
-            
-    earning_loss = earnings_list[0][1] - earning
-    return earning_loss
-#
-# Custom functions end here
-#
-
 def heur_null(state):
     '''Null Heuristic use to make A* search perform uniform cost search'''
     return 0
@@ -290,16 +296,21 @@ def heur_sum_delivery_costs(state):
     #point then to J's dropoff point and then deliver J.
     sum_delivery_costs = 0
     
-    for job in self.get_carrying():
-        sum_delivery_costs += get_job_loss(self.get_time(), job, self.get_job_list())
+    for job_name in self.get_carrying():
+        sum_delivery_costs += state.get_job_loss(self.get_time(), job_name)
     
-    for job in self.get_unstarted():
-        job_info = get_job_info(job, self.get_job_list())
-        job_pickup_time = job_info[2]                             
-        job_destination_location = job_info[3]
-        travel_time = get_travel_time(self.get_loc(), job_destination_location, self.get_loc_map())
-        new_state_time = self.get_time() + travel_time
-        sum_delivery_costs += get_job_loss(max(job_pickup_time, new_state_time), job, self.get_job_list())
+    for job_name in self.get_unstarted():
+        job_pickup_time = state.get_pickup_time(job_name)
+        job_pickup_location = state.get_pickup_location(job_name)
+        job_destination_location = state.get_destination_location(job_name)
+        
+        pickup_travel_time = state.get_travel_time(state.get_loc(), job_pickup_location)
+        actual_pickup_time = max(state.get_time() + pickup_travel_time, job_pickup_time)
+        
+        deliver_travel_time = state.get_travel_time(job_pickup_location, job_destination_location)
+        actual_deliver_time = actual_pickup_time + deliver_travel_time
+        
+        sum_delivery_costs += state.get_job_loss(actual_deliver_time, job_name)
     
     return sum_delivery_costs
         
@@ -311,20 +322,25 @@ def heur_max_delivery_costs(state):
     #m2 = Max over every unstarted job J: Lost revenue if we immediately travel to J's pickup 
     #point then to J's dropoff poing and then deliver J.
     #heur_max_delivery_costs(state) = max(m1, m2)
-    m1 = 0
-    m2 = 0
-    for job in state.get_carrying():
-        m1 = max(m1, get_job_loss(state.get_time(), job, state.get_job_list()))
+    max_delivery_costs = 0
+    
+    for job_name in state.get_carrying():
+        max_delivery_costs = max(max_delivery_costs, state.get_job_loss(state.get_time(), job_name))
         
-    for job in state.get_unstarted():
-        job_info = get_job_info(job, state.get_job_list())
-        job_pickup_time = job_info[2]                             
-        job_destination_location = job_info[3]
-        travel_time = get_travel_time(state.get_loc(), job_destination_location, state.get_loc_map())
-        new_state_time = state.get_time() + travel_time
-        m2 = max(m2, get_job_loss(max(job_pickup_time, new_state_time), job, state.get_job_list()))
+    for job_name in state.get_unstarted():
+        job_pickup_time = state.get_pickup_time(job_name)
+        job_pickup_location = state.get_pickup_location(job_name)
+        job_destination_location = state.get_destination_location(job_name)
+        
+        pickup_travel_time = state.get_travel_time(state.get_loc(), job_pickup_location)
+        actual_pickup_time = max(state.get_time() + pickup_travel_time, job_pickup_time)
+        
+        deliver_travel_time = state.get_travel_time(job_pickup_location, job_destination_location)
+        actual_deliver_time = actual_pickup_time + deliver_travel_time
+        
+        max_delivery_costs = max(max_delivery_costs, state.get_job_loss(actual_deliver_time, job_name))
 
-    return max(m1, m2)
+    return max_delivery_costs
 
 def bicycle_goal_fn(state):
 #IMPLEMENT

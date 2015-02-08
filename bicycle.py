@@ -95,6 +95,9 @@ class bicycle(StateSpace):
                             cannot_pickup = True
 
                     if cannot_pickup == False:
+                        travel_time = get_travel_time(self.get_loc(), job_pickup_location, self.get_loc_map())
+                        new_state_time = self.get_time() + travel_time
+                        
                         new_jobs_carried = list(self.get_carrying())
                         new_jobs_carried.append(job_name)
                         new_jobs_not_started = list(self.get_unstarted())
@@ -102,7 +105,7 @@ class bicycle(StateSpace):
                         new_state = bicycleStateInfo(new_jobs_carried, \
                                                     self.get_load() + job_weight, \
                                                     job_pickup_location, \
-                                                    job_pickup_time, \
+                                                    max(new_state_time, job_pickup_time), \
                                                     self.get_earned(), \
                                                     new_jobs_not_started)
                         
@@ -135,7 +138,8 @@ class bicycle(StateSpace):
                                                 new_jobs_not_started)
                     
                     action = "deliver(" + job_name + ")"
-                    States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_job_list(), self)) # TODO: fix gval
+                    new_gval = self.gval + get_job_loss(new_state_time, job_name, self.get_job_list())
+                    States.append(bicycle(action, new_gval, new_state, self.get_loc_map(), self.get_job_list(), self))
 
         return States
     
@@ -223,8 +227,10 @@ def get_job_info(job_name, job_list):
 def get_travel_time(locA, locB, loc_map):
     ''' Given two locations return the associated travel time in map.
         Assume there always exists a corresponding entry. '''
-    check = False
-        
+    if locA == locB:
+        return 0
+    
+    check = False    
     for index in range(len(loc_map[1])):
         check = all(x in loc_map[1][index] for x in [locA, locB])
         if check == True:
@@ -245,8 +251,27 @@ def get_job_earning(time, job_name, job_list):
     for elem in earnings_list:
         if time <= elem[0]:
             earning = elem[1]
+            break
     
     return earning
+
+def get_job_loss(time, job_name, job_list):
+    ''' Given a delivery time and a job name return the loss
+        incurred when delivering the job at that time. '''
+    for index in range(len(job_list)):
+        if job_list[index][0] == job_name:
+            break
+    
+    earnings_list = job_list[index][5]
+    earning = 0
+    
+    for elem in earnings_list:
+        if time <= elem[0]:
+            earning = elem[1]
+            break
+            
+    earning_loss = earnings_list[0][1] - earning
+    return earning_loss
 #
 # Custom functions end here
 #

@@ -295,7 +295,10 @@ def heur_sum_delivery_costs(state):
     sum_delivery_costs = 0
     
     for job_name in self.get_carrying():
-        sum_delivery_costs += state.get_job_loss(self.get_time(), job_name)
+        job_destination_location = state.get_destination_location(job_name)
+        travel_time = state.get_travel_time(state.get_loc(), job_destination_location)
+        new_state_time = state.get_time() + travel_time
+        sum_delivery_costs += state.get_job_loss(new_state_time, job_name)
     
     for job_name in self.get_unstarted():
         job_pickup_time = state.get_pickup_time(job_name)
@@ -323,7 +326,10 @@ def heur_max_delivery_costs(state):
     max_delivery_costs = 0
     
     for job_name in state.get_carrying():
-        max_delivery_costs = max(max_delivery_costs, state.get_job_loss(state.get_time(), job_name))
+        job_destination_location = state.get_destination_location(job_name)
+        travel_time = state.get_travel_time(state.get_loc(), job_destination_location)
+        new_state_time = state.get_time() + travel_time
+        max_delivery_costs = max(max_delivery_costs, state.get_job_loss(new_state_time, job_name))
         
     for job_name in state.get_unstarted():
         job_pickup_time = state.get_pickup_time(job_name)

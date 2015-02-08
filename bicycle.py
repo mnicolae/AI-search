@@ -146,8 +146,8 @@ class bicycle(StateSpace):
     def hashable_state(self) :
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
-        # TODO
-    
+        #return (self.get_carrying(), self.get_load(), self.get_loc(), self.get_time(), self.get_earned(), self.get_unstarted())
+        return (self.get_time(), self.get_loc(), self.get_earned(), self.get_load())
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
         #and in generating sample trace output. 
@@ -288,8 +288,21 @@ def heur_sum_delivery_costs(state):
     #Plus 
     #Sum over every unstarted job J: Lost revenue if we immediately travel to J's pickup 
     #point then to J's dropoff point and then deliver J.
-    # TODO
-
+    sum_delivery_costs = 0
+    
+    for job in self.get_carrying():
+        sum_delivery_costs += get_job_loss(self.get_time(), job, self.get_job_list())
+    
+    for job in self.get_unstarted():
+        job_info = get_job_info(job, self.get_job_list())
+        job_pickup_time = job_info[2]                             
+        job_destination_location = job_info[3]
+        travel_time = get_travel_time(self.get_loc(), job_destination_location, self.get_loc_map())
+        new_state_time = self.get_time() + travel_time
+        sum_delivery_costs += get_job_loss(max(job_pickup_time, new_state_time), job, self.get_job_list())
+    
+    return sum_delivery_costs
+        
 def heur_max_delivery_costs(state):
 #IMPLEMENT
     '''Bicycle Heuristic sum of delivery costs.'''
@@ -298,7 +311,20 @@ def heur_max_delivery_costs(state):
     #m2 = Max over every unstarted job J: Lost revenue if we immediately travel to J's pickup 
     #point then to J's dropoff poing and then deliver J.
     #heur_max_delivery_costs(state) = max(m1, m2)
-    # TODO
+    m1 = 0
+    m2 = 0
+    for job in state.get_carrying():
+        m1 = max(m1, get_job_loss(state.get_time(), job, state.get_job_list()))
+        
+    for job in state.get_unstarted():
+        job_info = get_job_info(job, state.get_job_list())
+        job_pickup_time = job_info[2]                             
+        job_destination_location = job_info[3]
+        travel_time = get_travel_time(state.get_loc(), job_destination_location, state.get_loc_map())
+        new_state_time = state.get_time() + travel_time
+        m2 = max(m2, get_job_loss(max(job_pickup_time, new_state_time), job, state.get_job_list()))
+
+    return max(m1, m2)
 
 def bicycle_goal_fn(state):
 #IMPLEMENT

@@ -60,7 +60,6 @@ class bicycle(StateSpace):
                     new_jobs_not_started = list(self.get_unstarted())
                     new_jobs_not_started.remove(job_name)
                     
-                    # TODO: what if travel time value implies we arrive later than the pickup time? 
                     new_state = bicycleStateInfo(new_jobs_carried, \
                                                     self.get_load() + job_weight, \
                                                     job_pickup_location, \

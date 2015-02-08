@@ -61,7 +61,6 @@ class bicycle(StateSpace):
                     new_jobs_not_started.remove(job_name)
                     
                     # TODO: what if travel time value implies we arrive later than the pickup time? 
-                    # TODO: can we assume one package does not exceed the weight limit?
                     new_state = bicycleStateInfo(new_jobs_carried, \
                                                     self.get_load() + job_weight, \
                                                     job_pickup_location, \

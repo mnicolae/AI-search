@@ -118,15 +118,15 @@ def h_misplacedTiles(state):
     #return the number of tiles (NOT INCLUDING THE BLANK) in state that are not in their goal
     #position. (will need to access the class variable eigthPuzzle.goal_state)
     misplaced_tiles = 0
-    
+
     for index in range(len(state.state)):
         # Skip the zero tile
         if index == state.blank_tile_idx:
             continue
-        
+
         if state.state[index] != eightPuzzle.goal_state[index]:
             misplaced_tiles += 1
-    
+
     return misplaced_tiles
 
 def h_MHDist(state):
@@ -136,19 +136,19 @@ def h_MHDist(state):
     #and that has to be in row x column y in the goal is defined to be
     #  abs(i - x) + abs(j - y)
     mh_dist = 0
-    
+
     for index in range(len(state.state)):
         # Skip the zero tile
         if index == state.blank_tile_idx:
             continue
-        
+
         tile_goal_index = eightPuzzle.goal_state.index(state.state[index])
-        
+
         xCoord = index % 3
         xCoordGoal = tile_goal_index % 3
         yCoord = index // 3
         yCoordGoal = tile_goal_index // 3
-                        
+
         mh_dist += abs(xCoord - xCoordGoal) + abs(yCoord - yCoordGoal)
-        
+
     return mh_dist

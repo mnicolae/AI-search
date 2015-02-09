@@ -298,13 +298,13 @@ def heur_sum_delivery_costs(state):
     #point then to J's dropoff point and then deliver J.
     sum_delivery_costs = 0
     
-    for job_name in self.get_carrying():
+    for job_name in state.get_carrying():
         job_destination_location = state.get_destination_location(job_name)
         travel_time = state.get_travel_time(state.get_loc(), job_destination_location)
         new_state_time = state.get_time() + travel_time
         sum_delivery_costs += state.get_job_loss(new_state_time, job_name)
     
-    for job_name in self.get_unstarted():
+    for job_name in state.get_unstarted():
         job_pickup_time = state.get_pickup_time(job_name)
         job_pickup_location = state.get_pickup_location(job_name)
         job_destination_location = state.get_destination_location(job_name)

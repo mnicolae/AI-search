@@ -96,7 +96,7 @@ class bicycle(StateSpace):
                         travel_time = self.get_travel_time(self.get_loc(), job_pickup_location)
                         new_state_time = self.get_time() + travel_time
                         
-                        # Cannot perform a pickup action if the job's pickup time is past the end of the day time.
+                        # Cannot perform a pickup action if the actual pickup time is past the end of the day time.
                         if max(new_state_time, job_pickup_time) <= self.get_max_deliver():
                             new_jobs_carried = list(self.get_carrying())
                             new_jobs_carried.append(job_name)

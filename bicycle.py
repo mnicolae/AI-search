@@ -351,7 +351,7 @@ def bicycle_goal_fn(state):
     '''Have we reached the goal (where all jobs have been delivered)?'''
     return len(state.get_carrying()) == 0 and len(state.get_unstarted()) == 0
 
-def make_start_state(loc_map, job_list):
+def make_start_state(map, job_list):
 #IMPLEMENT
     '''Input a map list and a job_list. Return a bicycle StateSpace object
     with action "START", gval = 0, and initial location "home" that represents the 
@@ -362,7 +362,7 @@ def make_start_state(loc_map, job_list):
         jobs_not_started.append(job[0]);
     
     bStateInfo = bicycleStateInfo([], 0, "home", 420, 0, jobs_not_started)
-    start_state = bicycle("START", 0, bStateInfo, loc_map, job_list)
+    start_state = bicycle("START", 0, bStateInfo, map, job_list)
     return start_state
 
 ########################################################
@@ -436,3 +436,4 @@ def test(nloc, njobs):
     se = SearchEngine('astar', 'full')
     #se.trace_on(2)
     final = se.search(s0, bicycle_goal_fn, heur_max_delivery_costs)
+    

@@ -145,7 +145,11 @@ class bicycle(StateSpace):
     def hashable_state(self) :
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
-        return (''.join(self.get_carrying()), self.get_load(), self.get_loc(), self.get_time(), self.get_earned(), ''.join(self.get_unstarted()))
+        carried = list(self.get_carrying())
+        carried.sort()
+        unstarted = list(self.get_unstarted())
+        unstarted.sort()
+        return (tuple(carried), self.get_loc(), self.get_time(), self.get_earned(), tuple(unstarted))
 
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking

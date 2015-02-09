@@ -89,6 +89,7 @@ class bicycle(StateSpace):
                         carried_job_destination_location = self.get_destination_location(carried_job_name)
                         if job_pickup_location == carried_job_destination_location:
                             cannot_pickup = True
+                            break
 
                     if cannot_pickup == False:
                         travel_time = self.get_travel_time(self.get_loc(), job_pickup_location)

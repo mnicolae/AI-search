@@ -54,7 +54,8 @@ class bicycle(StateSpace):
                 
                 # Cannot perform a first_pickup action if adding the job to the jobs already carried
                 # by the courier causes the total weight carried to exceed the courier's limit.
-                if self.get_load() + job_weight <= self.get_max_weight():
+                # Cannot perform a first_pickup action if the job's pickup time is past the end of the day time.
+                if self.get_load() + job_weight <= self.get_max_weight() and job_pickup_time <= self.get_max_deliver():
                     new_jobs_carried = list(self.get_carrying())
                     new_jobs_carried.append(job_name)
                     new_jobs_not_started = list(self.get_unstarted())
@@ -95,19 +96,21 @@ class bicycle(StateSpace):
                         travel_time = self.get_travel_time(self.get_loc(), job_pickup_location)
                         new_state_time = self.get_time() + travel_time
                         
-                        new_jobs_carried = list(self.get_carrying())
-                        new_jobs_carried.append(job_name)
-                        new_jobs_not_started = list(self.get_unstarted())
-                        new_jobs_not_started.remove(job_name)
-                        new_state = bicycleStateInfo(new_jobs_carried, \
-                                                    self.get_load() + job_weight, \
-                                                    job_pickup_location, \
-                                                    max(new_state_time, job_pickup_time), \
-                                                    self.get_earned(), \
-                                                    new_jobs_not_started)
+                        # Cannot perform a pickup action if the job's pickup time is past the end of the day time.
+                        if max(new_state_time, job_pickup_time) <= self.get_max_deliver():
+                            new_jobs_carried = list(self.get_carrying())
+                            new_jobs_carried.append(job_name)
+                            new_jobs_not_started = list(self.get_unstarted())
+                            new_jobs_not_started.remove(job_name)
+                            new_state = bicycleStateInfo(new_jobs_carried, \
+                                                        self.get_load() + job_weight, \
+                                                        job_pickup_location, \
+                                                        max(new_state_time, job_pickup_time), \
+                                                        self.get_earned(), \
+                                                        new_jobs_not_started)
                         
-                        action = "pickup(" + job_name + ")"
-                        States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_jobs_info(), self))
+                            action = "pickup(" + job_name + ")"
+                            States.append(bicycle(action, self.gval, new_state, self.get_loc_map(), self.get_jobs_info(), self))
 
             # Deliver actions
             for job_name in self.get_carrying():

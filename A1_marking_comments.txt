@@ -1,0 +1,62 @@
+Eight Puzzle:
+  Programming:
+    Misplaced tiles heuristic: 5/5
+    Manhattan distance heuristic: 5/5
+    Solution cost: 5/5
+    Successors: 5/5
+
+    Score: 5+5+0.5*5+0.5*5 = 15/15
+
+  Written part:
+    a: 1.00/1
+    b: 1.00/1
+
+    Score: 1.00 + 1.00 = 2.00/2
+
+  Total: 15 + 5*2.00 = 20.00 points (out of 20)
+
+Courier:
+  Programming:
+    Sum delivery costs heuristic: 24/24
+    Max delivery costs heuristic: 24/24
+    Successors: 24/24
+    Correct solution:
+      Earned: 22/22
+      Load: 22/22
+      Carrying: 22/22
+      Unsolvable: 2/2
+
+    Score: 24+24+24+(0.5*22+0.25*22+0.25*22+2) = 96.00/96
+
+  Written part:
+    a: 0.00/1
+    b: 1.00/1
+    c: 1.00/1
+    d: 0.50/1
+    e: 1.00/1
+    f: 1.00/1
+
+    Score: 0.00 + 1.00 + 1.00 + 0.50 + 1.00 + 1.00 = 4.50/6
+
+  Total: (60/96)*96.00 + (20/6)*4.50 = 75.00 points (out of 80)
+
+Grand total: 95.00 points (out of 100)
+
+NOTES:
+Eight puzzle was evaluated over 5 test cases. You were given one point for each
+heuristic that correctly evaluated the state, half a point if the solution cost
+found (using the null heuristic) was correct (or if the case was correctly
+identified as unsolvable), and a half a point if the successors for the initial
+state were correctly generated. This gives a total of 5*3=15 points for this
+part. The other 5 points were assigned to the written part.
+
+The courier domain was evaluated over 24 cases. You were given one point for
+each heuristic that correctly evaluated the initial state and one point each
+time the successors were correctly generated. Additionally, you were given one
+point each time you correctly identified the problem as unsolvable, half a
+point each time your goal state correctly reported the earnings, a quarter
+point each time your goal state was carrying no jobs and another quarter if it
+correctly returned a load of 0 (these last four items effectively correspond to
+giving one point for every correct solution). This gives a total of 96 points
+that were normalized to a range of up to 60. The remaining 20 points were
+assigned to the written part.
